@@ -6,7 +6,7 @@ import os
 
 import rospkg
 
-from qt_gui.QtBindingHelper import loadUi
+from qt_gui.qt_binding_helper import loadUi
 from QtCore import QEvent, QFile, QIODevice, QObject, QPointF, QRectF, Qt, QTextStream, Signal, QAbstractListModel, SIGNAL
 from QtGui import QColor, QFileDialog, QGraphicsScene, QIcon, QImage, QPainter, QWidget, QCompleter
 from QtSvg import QSvgGenerator
@@ -14,20 +14,16 @@ from QtSvg import QSvgGenerator
 import roslib
 roslib.load_manifest('rqt_dep')
 
-import rqt_graph.dotcode_pack
-from rqt_graph.dotcode_pack import RosPackageGraphDotcodeGenerator
+from .dotcode_pack import RosPackageGraphDotcodeGenerator
 from qt_dotgraph.pydotfactory import PydotFactory
 # from qt_dotgraph.pygraphvizfactory import PygraphvizFactory
 from qt_dotgraph.dot_to_qt import DotToQtGenerator
 
-import rqt_graph.InteractiveGraphicsView
+from rqt_graph.interactive_graphics_view import InteractiveGraphicsView
 
 
 class RepeatedWordCompleter(QCompleter):
     """A completer that completes multiple times from a list"""
-    def init(self, parent=None):
-        QCompleter.init(self, parent)
-
     def pathFromIndex(self, index):
         path = QCompleter.pathFromIndex(self, index)
         lst = str(self.widget().text()).split(',')
@@ -39,12 +35,14 @@ class RepeatedWordCompleter(QCompleter):
         path = str(path.split(',')[-1]).lstrip(' ')
         return [path]
 
+
 class StackageCompletionModel(QAbstractListModel):
     """Ros package and stacknames"""
     def __init__(self, linewidget, rospack, rosstack):
         super(QAbstractListModel, self).__init__(linewidget)
         self.allnames = sorted(list(set(rospack.list() + rosstack.list())))
         self.allnames = self.allnames + ['-%s' % name for name in self.allnames]
+
     def rowCount(self, parent):
         return len(self.allnames)
 
@@ -53,8 +51,6 @@ class StackageCompletionModel(QAbstractListModel):
         if index.isValid() and (role == Qt.DisplayRole or role == Qt.EditRole):
             return self.allnames[index.row()]
         return None
-
-
 
 
 class RosPackGraph(QObject):
@@ -83,7 +79,7 @@ class RosPackGraph(QObject):
         self.dot_to_qt = DotToQtGenerator()
 
         ui_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'RosPackGraph.ui')
-        loadUi(ui_file, self._widget, {'InteractiveGraphicsView': rqt_graph.InteractiveGraphicsView})
+        loadUi(ui_file, self._widget, {'InteractiveGraphicsView': InteractiveGraphicsView})
         self._widget.setObjectName('RosPackGraphUi')
         if context.serial_number() > 1:
             self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
