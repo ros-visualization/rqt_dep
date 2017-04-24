@@ -2,13 +2,14 @@
   <name>rqt_dep</name>
   <version>0.4.7</version>
   <description>rqt_dep provides a GUI plugin for visualizing the ROS dependency graph.</description>
+  <maintainer email="dthomas@osrfoundation.org">Dirk Thomas</maintainer>
   <maintainer email="ablasdel@gmail.com">Aaron Blasdel</maintainer>
 
   <license>BSD</license>
 
-  <url type="website">http://ros.org/wiki/rqt_dep</url>
-  <url type="repository">https://github.com/ros-visualization/rqt_common_plugins</url>
-  <url type="bugtracker">https://github.com/ros-visualization/rqt_common_plugins/issues</url>
+  <url type="website">http://wiki.ros.org/rqt_dep</url>
+  <url type="repository">https://github.com/ros-visualization/rqt_dep</url>
+  <url type="bugtracker">https://github.com/ros-visualization/rqt_dep/issues</url>
 
   <author>Thibault Kruse</author>
 
@@ -29,4 +30,3 @@
     <qt_gui plugin="${prefix}/plugin.xml"/>
   </export>
 </package>
-
