@@ -31,8 +31,10 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import division
+from __future__ import print_function
 import os
 import pickle
+import sys
 
 import rospkg
 
@@ -273,7 +275,12 @@ class RosPackGraph(Plugin):
 
     # this runs in a non-gui thread, so don't access widgets here directly
     def _update_thread_run(self):
-        self._update_graph(self._generate_dotcode())
+        try:
+            dotcode = self._generate_dotcode()
+        except Exception as e:
+            print(str(type(e)), str(e), file=sys.stderr)
+            return
+        self._update_graph(dotcode)
 
     @Slot()
     def _update_finished(self):
