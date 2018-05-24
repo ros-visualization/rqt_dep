@@ -2,8 +2,8 @@
 Changelog for package rqt_dep
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.9 (2018-05-24)
+------------------
 * catch exceptions caused by threading to prevent crashing UI (`#4 <https://github.com/ros-visualization/rqt_dep/issues/4>`_)
 
 0.4.8 (2017-04-24)
