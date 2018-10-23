@@ -89,7 +89,9 @@ class RosPackageGraphDotcodeGenerator:
                          hide_dry=False):
         """
 
-        :param hide_transitives: if true, then dependency of children to grandchildren will be hidden if parent has same dependency
+        :param hide_transitives:
+            if true, then dependency of children to grandchildren will be hidden if parent has
+            same dependency
         :param show_system: if true, then system dependencies will be shown
         """
 
@@ -202,12 +204,13 @@ class RosPackageGraphDotcodeGenerator:
                                           rankdir=self.rankdir,
                                           ranksep=self.ranksep,
                                           simplify=self.simplify)
-        # print("In generate", self.with_stacks, len(self.stacks), len(self.packages), len(self.edges))
         packages_in_stacks = []
         if self.with_stacks and not self.hide_dry:
             for stackname in self.stacks:
                 color = None
-                if self.mark_selected and not '.*' in self.selected_names and matches_any(stackname, self.selected_names):
+                if self.mark_selected and \
+                        '.*' not in self.selected_names and \
+                        matches_any(stackname, self.selected_names):
                     color = 'tomato'
                 else:
                     color = 'gray'
@@ -236,7 +239,9 @@ class RosPackageGraphDotcodeGenerator:
         if self._hide_package(package_name):
             return
         color = None
-        if self.mark_selected and not '.*' in self.selected_names and matches_any(package_name, self.selected_names):
+        if self.mark_selected and \
+                '.*' not in self.selected_names and \
+                matches_any(package_name, self.selected_names):
             if attributes and attributes['is_catkin']:
                 color = 'red'
             else:
@@ -272,8 +277,9 @@ class RosPackageGraphDotcodeGenerator:
             try:
                 stackname = self.rospack.stack_of(package_name)
             except ResourceNotFound as e:
-                print('RosPackageGraphDotcodeGenerator._add_package(%s), parent %s: ResourceNotFound:' %
-                      (package_name, parent), e)
+                print(
+                    'RosPackageGraphDotcodeGenerator._add_package(%s), '
+                    'parent %s: ResourceNotFound:' % (package_name, parent), e)
                 stackname = None
             if not stackname is None and stackname != '':
                 if not stackname in self.stacks:
@@ -307,7 +313,9 @@ class RosPackageGraphDotcodeGenerator:
             return
         self.edges[(name1, name2)] = attributes
 
-    def add_package_ancestors_recursively(self, package_name, expanded_up=None, depth=None, implicit=False, parent=None):
+    def add_package_ancestors_recursively(
+            self, package_name, expanded_up=None,
+            depth=None, implicit=False, parent=None):
         """
         :param package_name: the name of package for which to add ancestors
         :param expanded_up: names that have already been expanded (to avoid cycles)
@@ -337,8 +345,9 @@ class RosPackageGraphDotcodeGenerator:
             try:
                 depends_on = self.rospack.get_depends_on(package_name, implicit=implicit)
             except ResourceNotFound as e:
-                print('RosPackageGraphDotcodeGenerator.add_package_ancestors_recursively(%s), parent %s: ResourceNotFound:' %
-                      (package_name, parent), e)
+                print(
+                    'RosPackageGraphDotcodeGenerator.add_package_ancestors_recursively(%s),'
+                    ' parent %s: ResourceNotFound:' % (package_name, parent), e)
                 depends_on = []
             new_nodes = []
             for dep_on_name in [x for x in depends_on if not matches_any(x, self.excludes)]:
@@ -354,7 +363,9 @@ class RosPackageGraphDotcodeGenerator:
                                                        implicit=implicit,
                                                        parent=package_name)
 
-    def add_package_descendants_recursively(self, package_name, expanded=None, depth=None, implicit=False, parent=None):
+    def add_package_descendants_recursively(
+            self, package_name, expanded=None,
+            depth=None, implicit=False, parent=None):
         if package_name in self.traversed_descendants:
             traversed_depth = self.traversed_descendants[package_name]
             if traversed_depth is None:
@@ -385,8 +396,9 @@ class RosPackageGraphDotcodeGenerator:
                     else:
                         raise
             except ResourceNotFound as e:
-                print('RosPackageGraphDotcodeGenerator.add_package_descendants_recursively(%s), parent: %s: ResourceNotFound:' %
-                      (package_name, parent), e)
+                print(
+                    'RosPackageGraphDotcodeGenerator.add_package_descendants_recursively(%s), '
+                    'parent: %s: ResourceNotFound:' % (package_name, parent), e)
                 depends = []
             # get system dependencies without recursion
             if self.show_system:
