@@ -2,8 +2,8 @@
 Changelog for package rqt_dep
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.10 (2020-03-17)
+-------------------
 * add Python 3 conditional dependencies (`#11 <https://github.com/ros-visualization/rqt_dep/issues/11>`_)
 * updating to flake8 style (`#8 <https://github.com/ros-visualization/rqt_dep/issues/8>`_)
 * autopep8 and gitignore (`#7 <https://github.com/ros-visualization/rqt_dep/issues/7>`_)
