@@ -2,6 +2,12 @@
 Changelog for package rqt_dep
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add Python 3 conditional dependencies (`#11 <https://github.com/ros-visualization/rqt_dep/issues/11>`_)
+* updating to flake8 style (`#8 <https://github.com/ros-visualization/rqt_dep/issues/8>`_)
+* autopep8 and gitignore (`#7 <https://github.com/ros-visualization/rqt_dep/issues/7>`_)
+
 0.4.9 (2018-05-24)
 ------------------
 * catch exceptions caused by threading to prevent crashing UI (`#4 <https://github.com/ros-visualization/rqt_dep/issues/4>`_)
