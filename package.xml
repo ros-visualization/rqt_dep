@@ -2,7 +2,6 @@
   <name>rqt_dep</name>
   <version>0.4.10</version>
   <description>rqt_dep provides a GUI plugin for visualizing the ROS dependency graph.</description>
-  <maintainer email="ablasdel@gmail.com">Aaron Blasdel</maintainer>
   <maintainer email="ivanpauno@ekumenlabs.com">Ivan Paunovic</maintainer>
 
   <license>BSD</license>
@@ -11,6 +10,7 @@
   <url type="repository">https://github.com/ros-visualization/rqt_dep</url>
   <url type="bugtracker">https://github.com/ros-visualization/rqt_dep/issues</url>
 
+  <author>Aaron Blasdel</author>
   <author>Dirk Thomas</author>
   <author>Thibault Kruse</author>
 
