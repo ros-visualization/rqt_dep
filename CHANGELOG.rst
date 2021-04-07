@@ -2,6 +2,13 @@
 Changelog for package rqt_dep
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update maintainers (`#13 <https://github.com/ros-visualization/rqt_dep/issues/13>`_)
+* Fix shebang line for python3 (`#12 <https://github.com/ros-visualization/rqt_dep/issues/12>`_)
+* Bump CMake minimum version to avoid CMP0048 warning
+* Contributors: Dirk Thomas, Ivan Santiago Paunovic, Mikael Arguedas
+
 0.4.10 (2020-03-17)
 -------------------
 * add Python 3 conditional dependencies (`#11 <https://github.com/ros-visualization/rqt_dep/issues/11>`_)
