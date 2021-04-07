@@ -2,8 +2,8 @@
 Changelog for package rqt_dep
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.11 (2021-04-07)
+-------------------
 * Update maintainers (`#13 <https://github.com/ros-visualization/rqt_dep/issues/13>`_)
 * Fix shebang line for python3 (`#12 <https://github.com/ros-visualization/rqt_dep/issues/12>`_)
 * Bump CMake minimum version to avoid CMP0048 warning
