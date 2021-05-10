@@ -2,6 +2,11 @@
 Changelog for package rqt_dep
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix rqt_dep for Noetic. (`#16 <https://github.com/ros-visualization/rqt_dep/issues/16>`_)
+* Contributors: Ivan Santiago Paunovic
+
 0.4.11 (2021-04-07)
 -------------------
 * Update maintainers (`#13 <https://github.com/ros-visualization/rqt_dep/issues/13>`_)
