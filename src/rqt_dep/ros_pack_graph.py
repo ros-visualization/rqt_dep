@@ -79,7 +79,7 @@ class StackageCompletionModel(QAbstractListModel):
 
     def __init__(self, linewidget, rospack, rosstack):
         super(StackageCompletionModel, self).__init__(linewidget)
-        self.allnames = sorted(list(set(rospack.list() + rosstack.list())))
+        self.allnames = sorted(list(set(list(rospack.list()) + list(rosstack.list()))))
         self.allnames = self.allnames + ['-%s' % name for name in self.allnames]
 
     def rowCount(self, parent):

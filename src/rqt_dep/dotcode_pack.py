@@ -70,8 +70,8 @@ class RosPackageGraphDotcodeGenerator:
 
     def generate_dotcode(self,
                          dotcode_factory,
-                         selected_names=[],
-                         excludes=[],
+                         selected_names=None,
+                         excludes=None,
                          depth=3,
                          with_stacks=True,
                          descendants=True,
@@ -95,10 +95,14 @@ class RosPackageGraphDotcodeGenerator:
         :param show_system: if true, then system dependencies will be shown
         """
 
+        if selected_names is None:
+            selected_names = []
+        if excludes is None:
+            excludes = []
         # defaults
-        selected_names = filter(lambda x: x is not None and x != '', selected_names)
-        excludes = filter(lambda x: x is not None and x != '', excludes)
-        if selected_names is None or selected_names == []:
+        selected_names = [x for x in selected_names if x is not None and x != '']
+        excludes = [x for x in excludes if x is not None and x != '']
+        if not selected_names:
             selected_names = ['.*']
             self.depth = 1
         if depth is None:
