@@ -2,7 +2,7 @@
   <name>rqt_dep</name>
   <version>0.4.12</version>
   <description>rqt_dep provides a GUI plugin for visualizing the ROS dependency graph.</description>
-  <maintainer email="ivanpauno@ekumenlabs.com">Ivan Paunovic</maintainer>
+  <maintainer email="geoff@openrobotics.org">Geoffrey Biggs</maintainer>
 
   <license>BSD</license>
 
