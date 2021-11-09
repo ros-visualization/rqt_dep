@@ -13,6 +13,7 @@
   <author>Aaron Blasdel</author>
   <author>Dirk Thomas</author>
   <author>Thibault Kruse</author>
+  <author email="ivanpauno@ekumenlabs.com">Ivan Paunovic</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
