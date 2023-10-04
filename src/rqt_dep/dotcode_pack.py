@@ -279,7 +279,21 @@ class RosPackageGraphDotcodeGenerator:
 
         if self.with_stacks:
             try:
-                stackname = self.rospack.stack_of(package_name)
+                if self._is_package_wet(package_name):
+                    # get stackname (metapackage) where package_name belongs to
+                    stackname = None
+                    # for all metapackages
+                    for name in self.rosstack.list():
+                        # if package_name is one of dependency of metapackage (name)
+                        if package_name in self.rosstack.get_depends(name, implicit=False):
+                            # if package_name is buildtool depend, remove it.
+                            from catkin_pkg.package import parse_package
+                            p = parse_package(self.rosstack.get_path(name)+'/package.xml')
+                            if package_name not in [d.name for d in p.buildtool_depends]:
+                                stackname = name
+                else:
+                    # for old dry package
+                    stackname = self.rospack.stack_of(package_name)
             except ResourceNotFound as e:
                 print(
                     'RosPackageGraphDotcodeGenerator._add_package(%s), '
