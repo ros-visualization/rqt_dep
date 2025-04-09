@@ -2,6 +2,11 @@
 Changelog for package rqt_dep
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Import setup from setuptools instead of distutils.core (`#18 <https://github.com/ros-visualization/rqt_dep/issues/18>`_)
+* Contributors: Arne Hitzmann, Matthijs van der Burgh
+
 0.4.12 (2021-05-10)
 -------------------
 * Fix rqt_dep for Noetic. (`#16 <https://github.com/ros-visualization/rqt_dep/issues/16>`_)
