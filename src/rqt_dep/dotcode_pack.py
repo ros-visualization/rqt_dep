@@ -32,13 +32,21 @@
 
 from __future__ import with_statement, print_function
 
-import os
+import xml.etree.ElementTree as ET
+
 import re
+from typing import Any, Callable, List
+from typing_extensions import Protocol
 
-from rospkg import MANIFEST_FILE
-from rospkg.common import ResourceNotFound
+class GetItem(Protocol):
+    def __getitem__(self: 'Getitem', key: Any) -> Any: pass # type: ignore
+    def __getitem__(self: 'Getitem', key: Any) -> Any: pass # type: ignore 
+
+from rospkg.common import PACKAGE_FILE
 from qt_dotgraph.colors import get_color_for_string
+from ament_index_python.packages import get_search_paths, get_package_prefix, get_package_share_path, PackageNotFoundError
 
+import apt
 
 def matches_any(name, patternlist):
     for pattern in patternlist:
@@ -51,22 +59,26 @@ def matches_any(name, patternlist):
 
 
 class RosPackageGraphDotcodeGenerator:
-
-    def __init__(self, rospack, rosstack):
+    def __init__(self, list_fun:Callable[[],List[str]], system_cache:GetItem):
         """
         :param rospack: use rospkg.RosPack()
         :param rosstack: use rospkg.RosStack()
         """
-        self.rospack = rospack
-        self.rosstack = rosstack
-        self.stacks = {}
-        self.packages = {}
+        # self.rospack = rospack
+        # self.rosstack = rosstack
+        self.list_fun = list_fun
+        self.system_cache = system_cache
+        # self.stacks = {}
+        # self.packages = {}
         self.package_types = {}
         self.edges = {}
         self.traversed_ancestors = {}
         self.traversed_descendants = {}
         self.last_drawargs = None
         self.last_selection = None
+
+        search_paths = get_search_paths()
+        self.dry_path = get_search_paths()[-1] if len(search_paths) else ""
 
     def generate_dotcode(self,
                          dotcode_factory,
@@ -150,26 +162,26 @@ class RosPackageGraphDotcodeGenerator:
             self.traversed_ancestors = {}
             self.traversed_descendants = {}
             # update internal graph structure
-            for name in self.rospack.list():
+            for name in self.list_fun():
                 if matches_any(name, self.selected_names):
                     if descendants:
                         self.add_package_descendants_recursively(name)
                     if ancestors:
                         self.add_package_ancestors_recursively(name)
-            for stackname in self.rosstack.list():
-                if matches_any(stackname, self.selected_names):
-                    manifest = self.rosstack.get_manifest(stackname)
-                    if manifest.is_catkin:
-                        if descendants:
-                            self.add_package_descendants_recursively(stackname)
-                        if ancestors:
-                            self.add_package_ancestors_recursively(stackname)
-                    else:
-                        for package_name in self.rosstack.packages_of(stackname):
-                            if descendants:
-                                self.add_package_descendants_recursively(package_name)
-                            if ancestors:
-                                self.add_package_ancestors_recursively(package_name)
+            # for stackname in self.rosstack.list():
+            #     if matches_any(stackname, self.selected_names):
+            #         manifest = self.rosstack.get_manifest(stackname)
+            #         if manifest.is_wet:
+            #             if descendants:
+            #                 self.add_package_descendants_recursively(stackname)
+            #             if ancestors:
+            #                 self.add_package_ancestors_recursively(stackname)
+            #         else:
+            #             for package_name in self.rosstack.packages_of(stackname):
+            #                 if descendants:
+            #                     self.add_package_descendants_recursively(package_name)
+            #                 if ancestors:
+            #                     self.add_package_ancestors_recursively(package_name)
 
         drawing_args = {
             'dotcode_factory': dotcode_factory,
@@ -246,11 +258,11 @@ class RosPackageGraphDotcodeGenerator:
         if self.mark_selected and \
                 '.*' not in self.selected_names and \
                 matches_any(package_name, self.selected_names):
-            if attributes and attributes['is_catkin']:
+            if attributes and attributes['is_wet']:
                 color = 'red'
             else:
                 color = 'tomato'
-        elif attributes and not attributes['is_catkin']:
+        elif attributes and not attributes['is_wet']:
             color = 'gray'
         if attributes and 'not_found' in attributes and attributes['not_found']:
             color = 'orange'
@@ -272,23 +284,23 @@ class RosPackageGraphDotcodeGenerator:
         if package_name in self.packages:
             return False
 
-        catkin_package = self._is_package_wet(package_name)
-        if catkin_package is None:
+        wet_package = self._is_package_wet(package_name)
+        if wet_package is None:
             return False
-        self.packages[package_name] = {'is_catkin': catkin_package}
+        self.packages[package_name] = {'is_wet': wet_package}
 
-        if self.with_stacks:
-            try:
-                stackname = self.rospack.stack_of(package_name)
-            except ResourceNotFound as e:
-                print(
-                    'RosPackageGraphDotcodeGenerator._add_package(%s), '
-                    'parent %s: ResourceNotFound:' % (package_name, parent), e)
-                stackname = None
-            if not stackname is None and stackname != '':
-                if not stackname in self.stacks:
-                    self._add_stack(stackname)
-                self.stacks[stackname]['packages'].append(package_name)
+        # if self.with_stacks:
+        #     try:
+        #         stackname = self.rospack.stack_of(package_name)
+        #     except ResourceNotFound as e:
+        #         print(
+        #             'RosPackageGraphDotcodeGenerator._add_package(%s), '
+        #             'parent %s: ResourceNotFound:' % (package_name, parent), e)
+        #         stackname = None
+        #     if not stackname is None and stackname != '':
+        #         if not stackname in self.stacks:
+        #             self._add_stack(stackname)
+        #         self.stacks[stackname]['packages'].append(package_name)
         return True
 
     def _hide_package(self, package_name):
@@ -305,10 +317,10 @@ class RosPackageGraphDotcodeGenerator:
     def _is_package_wet(self, package_name):
         if package_name not in self.package_types:
             try:
-                package_path = self.rospack.get_path(package_name)
-                manifest_file = os.path.join(package_path, MANIFEST_FILE)
-                self.package_types[package_name] = not os.path.exists(manifest_file)
-            except ResourceNotFound:
+                # package_path = self.rospack.get_path(package_name)
+                # manifest_file = os.path.join(package_path, MANIFEST_FILE)
+                self.package_types[package_name] = get_package_prefix(package_name) != self.dry_path # not os.path.exists(manifest_file)
+            except PackageNotFoundError:
                 return None
         return self.package_types[package_name]
 
@@ -317,6 +329,29 @@ class RosPackageGraphDotcodeGenerator:
             return
         self.edges[(name1, name2)] = attributes
 
+    @staticmethod
+    def _get_depends_on(package_name:str):
+        r = get_package_share_path(package_name) / PACKAGE_FILE
+        tree = ET.parse(r)
+        dep_types = [
+            "build_depend",
+            # "build_export_depend",
+            # "buildtool_depend",
+            # "buildtool_export_depend",
+            "exec_depend",
+            "depend",
+            # "doc_depend",
+            # "test_depend",
+        ]
+
+        deps:set[str] = set()
+
+        for dep_t in dep_types:
+            for dep in [x.text for x in tree.iter(dep_t) if x.text]:
+                deps.add(dep)
+
+        return deps
+    
     def add_package_ancestors_recursively(
             self, package_name, expanded_up=None,
             depth=None, implicit=False, parent=None):
@@ -347,8 +382,8 @@ class RosPackageGraphDotcodeGenerator:
         expanded_up.append(package_name)
         if (depth != 1):
             try:
-                depends_on = self.rospack.get_depends_on(package_name, implicit=implicit)
-            except ResourceNotFound as e:
+                depends_on = RosPackageGraphDotcodeGenerator._get_depends_on(package_name)
+            except PackageNotFoundError as e:
                 print(
                     'RosPackageGraphDotcodeGenerator.add_package_ancestors_recursively(%s),'
                     ' parent %s: ResourceNotFound:' % (package_name, parent), e)
@@ -389,29 +424,43 @@ class RosPackageGraphDotcodeGenerator:
             expanded = []
         expanded.append(package_name)
         if (depth != 1):
+            is_ros_package = False
+            is_system_package = False
+            search_problem = '???'
             try:
-                try:
-                    depends = self.rospack.get_depends(package_name, implicit=implicit)
-                except ResourceNotFound:
-                    # try falling back to rosstack to find wet metapackages
-                    manifest = self.rosstack.get_manifest(package_name)
-                    if manifest.is_catkin:
-                        depends = [d.name for d in manifest.depends]
-                    else:
-                        raise
-            except ResourceNotFound as e:
-                print(
-                    'RosPackageGraphDotcodeGenerator.add_package_descendants_recursively(%s), '
-                    'parent: %s: ResourceNotFound:' % (package_name, parent), e)
+                # try:
+                depends = RosPackageGraphDotcodeGenerator._get_depends_on(package_name) #self.rospack.get_depends(package_name, implicit=implicit)
+                is_ros_package = True
+                # except ResourceNotFound:
+                #     # try falling back to rosstack to find wet metapackages
+                #     manifest = self.rosstack.get_manifest(package_name)
+                #     if manifest.is_wet:
+                #         depends = [d.name for d in manifest.depends]
+                #     else:
+                #         raise
+            except PackageNotFoundError:
                 depends = []
+                search_problem = f"Resource not found in: {get_search_paths()}"
+
             # get system dependencies without recursion
-            if self.show_system:
-                rosdeps = self.rospack.get_rosdeps(package_name, implicit=implicit)
-                for dep_name in [x for x in rosdeps if not matches_any(x, self.excludes)]:
+            if self.show_system and not is_ros_package:
+                
+                if any(key.includes(package_name) for key in self.system_cache):
+                    # rosdeps = self.rospack.get_rosdeps(package_name, implicit=implicit)
+                    # for dep_name in [x for x in rosdeps if not matches_any(x, self.excludes)]:
+                    dep_name = package_name
                     if not self.hide_transitives or not dep_name in expanded:
                         self._add_edge(package_name, dep_name)
                         self._add_package(dep_name, parent=package_name)
                         expanded.append(dep_name)
+                else: 
+                    search_problem = f"Resource not found in system"
+
+            if not is_ros_package and not is_system_package:
+                print(
+                    'RosPackageGraphDotcodeGenerator.add_package_descendants_recursively(%s), '
+                    'parent: %s: ' % (package_name, parent), search_problem)
+
             new_nodes = []
             for dep_name in [x for x in depends if not matches_any(x, self.excludes)]:
                 if not self.hide_transitives or not dep_name in expanded:

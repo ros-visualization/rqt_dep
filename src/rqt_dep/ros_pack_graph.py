@@ -35,8 +35,13 @@ from __future__ import print_function
 import os
 import pickle
 import sys
+from typing import List, cast
 
-import rospkg
+import apt
+
+from ros2pkg.api import get_package_names
+from ament_index_python.packages import get_package_share_directory
+
 
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import QFile, QIODevice, Qt, Signal, Slot, QAbstractListModel
@@ -44,8 +49,8 @@ from python_qt_binding.QtGui import QIcon, QImage, QPainter
 from python_qt_binding.QtWidgets import QFileDialog, QGraphicsScene, QWidget, QCompleter
 from python_qt_binding.QtSvg import QSvgGenerator
 
-import rosservice
-import rostopic
+from ros2service.api import get_service_names_and_types
+from ros2topic.api import get_msg_class
 
 from .dotcode_pack import RosPackageGraphDotcodeGenerator
 from qt_dotgraph.pydotfactory import PydotFactory
@@ -77,9 +82,9 @@ class StackageCompletionModel(QAbstractListModel):
 
     """Ros package and stacknames"""
 
-    def __init__(self, linewidget, rospack, rosstack):
+    def __init__(self, linewidget):
         super(StackageCompletionModel, self).__init__(linewidget)
-        self.allnames = sorted(list(set(list(rospack.list()) + list(rosstack.list()))))
+        self.allnames = cast(List[str], sorted(get_package_names()))
         self.allnames = self.allnames + ['-%s' % name for name in self.allnames]
 
     def rowCount(self, parent):
@@ -108,20 +113,19 @@ class RosPackGraph(Plugin):
 
         self.setObjectName('RosPackGraph')
 
-        rospack = rospkg.RosPack()
-        rosstack = rospkg.RosStack()
+        # rospack = rospkg.RosPack()
+        # rosstack = rospkg.RosStack()
 
         # factory builds generic dotcode items
         self.dotcode_factory = PydotFactory()
         # self.dotcode_factory = PygraphvizFactory()
         # generator builds rosgraph
-        self.dotcode_generator = RosPackageGraphDotcodeGenerator(rospack, rosstack)
+        self.dotcode_generator = RosPackageGraphDotcodeGenerator(lambda: list(get_package_names()), apt.Cache())
         # dot_to_qt transforms into Qt elements using dot layout
         self.dot_to_qt = DotToQtGenerator()
 
         self._widget = QWidget()
-        rp = rospkg.RosPack()
-        ui_file = os.path.join(rp.get_path('rqt_dep'), 'resource', 'RosPackGraph.ui')
+        ui_file = os.path.join(get_package_share_directory('rqt_dep'), 'resource', 'RosPackGraph.ui')
         loadUi(ui_file, self._widget, {'InteractiveGraphicsView': InteractiveGraphicsView})
         self._widget.setObjectName('RosPackGraphUi')
         if context.serial_number() > 1:
@@ -149,7 +153,7 @@ class RosPackGraph(Plugin):
         self._widget.package_type_combo_box.insertItem(2, self.tr('dry only'), 1)
         self._widget.package_type_combo_box.currentIndexChanged.connect(self._refresh_rospackgraph)
 
-        completionmodel = StackageCompletionModel(self._widget.filter_line_edit, rospack, rosstack)
+        completionmodel = StackageCompletionModel(self._widget.filter_line_edit)
         completer = RepeatedWordCompleter(completionmodel, self)
         completer.setCompletionMode(QCompleter.PopupCompletion)
         completer.setWrapAround(True)
@@ -323,6 +327,7 @@ class RosPackGraph(Plugin):
                 excludes.append(name.strip()[1:])
             else:
                 includes.append(name.strip())
+
         # orientation = 'LR'
         descendants = True
         ancestors = True
@@ -353,21 +358,23 @@ class RosPackGraph(Plugin):
 
     def _generate_tool_tip(self, url):
         if url is not None and ':' in url:
+            print(url)
             item_type, item_path = url.split(':', 1)
             if item_type == 'node':
                 tool_tip = 'Node:\n  %s' % (item_path)
-                service_names = rosservice.get_service_list(node=item_path)
-                if service_names:
+                services = get_service_names_and_types(node=item_path)
+                if services:
                     tool_tip += '\nServices:'
-                    for service_name in service_names:
-                        try:
-                            service_type = rosservice.get_service_type(service_name)
-                            tool_tip += '\n  %s [%s]' % (service_name, service_type)
-                        except rosservice.ROSServiceIOException as e:
-                            tool_tip += '\n  %s' % (e)
+                    for service_name, service_type in services:
+                        # try:
+                            # service_type = rosservice.get_service_type(service_name)
+                        tool_tip += '\n  %s [%s]' % (service_name, service_type)
+                        # except rosservice.ROSServiceIOException as e:
+                        #     tool_tip += '\n  %s' % (e)
                 return tool_tip
             elif item_type == 'topic':
-                topic_type, topic_name, _ = rostopic.get_topic_type(item_path)
+                print(item_path)
+                topic_type, topic_name, _ = get_msg_class(item_path, item_path)
                 return 'Topic:\n  %s\nType:\n  %s' % (topic_name, topic_type)
         return url
 
