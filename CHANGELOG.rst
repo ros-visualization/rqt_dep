@@ -2,6 +2,11 @@
 Changelog for package rqt_dep
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Bump cmake_minimum_required to avoid deprecation (`#21 <https://github.com/ros-visualization/rqt_dep/issues/21>`_)
+* Contributors: Arne Hitzmann
+
 0.4.13 (2025-04-09)
 -------------------
 * Import setup from setuptools instead of distutils.core (`#18 <https://github.com/ros-visualization/rqt_dep/issues/18>`_)
